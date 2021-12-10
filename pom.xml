@@ -8,5 +8,11 @@
     <artifactId>my-config</artifactId>
     <version>1.0-SNAPSHOT</version>
 
-
+    <dependencies>
+        <dependency>
+            <groupId>com.alipay.sofa</groupId>
+            <artifactId>jraft-core</artifactId>
+            <version>1.3.9</version>
+        </dependency>
+    </dependencies>
 </project>
