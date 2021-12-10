@@ -1,5 +1,7 @@
 package com.ssw.config.consistence.entity;
 
+import com.ssw.config.core.entity.Constant;
+
 import java.io.Serializable;
 import java.util.Map;
 
@@ -9,7 +11,7 @@ import java.util.Map;
  * @Author sun
  * @Date 2021/12/10 10:29
  **/
-public class PutConfigRequest implements Serializable {
+public class PutConfigRequest implements Serializable,BaseRequest {
     private static final long serialVersionUID = 4093937043915416949L;
 
     private String namespaceId;
@@ -38,5 +40,10 @@ public class PutConfigRequest implements Serializable {
 
     public void setProps(Map<String, String> props) {
         this.props = props;
+    }
+
+    @Override
+    public String requestType() {
+        return Constant.OPERATION_PUT_CONFIG;
     }
 }

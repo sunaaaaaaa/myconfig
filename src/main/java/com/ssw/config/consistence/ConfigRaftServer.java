@@ -9,13 +9,13 @@ import com.alipay.sofa.jraft.option.NodeOptions;
 import com.alipay.sofa.jraft.rpc.RaftRpcServerFactory;
 import com.alipay.sofa.jraft.rpc.RpcServer;
 import com.ssw.config.config.RaftConfig;
-import com.ssw.config.consistence.processor.DelConfigProcessor;
-import com.ssw.config.consistence.processor.GetConfigProcessor;
-import com.ssw.config.consistence.processor.PutConfigProcessor;
+import com.ssw.config.consistence.entity.BaseResponse;
+import com.ssw.config.consistence.processor.*;
 import com.ssw.config.consistence.statemachine.ConfigCenterStateMachine;
 import org.apache.commons.io.FileUtils;
 import java.io.File;
 import java.io.IOException;
+import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * @ClassName ConfigRaftServer
@@ -28,6 +28,7 @@ public class ConfigRaftServer {
     private ConfigCenterStateMachine stateMachine;
     private Node raftNode;
     private volatile boolean isInit;
+    private AtomicLong leaderTerm = new AtomicLong(-1);
 
     public void init(RaftConfig raftConfig) throws IOException {
         //创建存储数据、快照、日志的父目录
@@ -47,7 +48,7 @@ public class ConfigRaftServer {
         }
 
         //创建状态机
-        stateMachine = new ConfigCenterStateMachine();
+        stateMachine = new ConfigCenterStateMachine(this);
         //raft初始化参数
         NodeOptions nodeOptions = new NodeOptions();
         //设置集群其他成员
@@ -64,9 +65,11 @@ public class ConfigRaftServer {
 
         //raft rpc服务器,此处配置中心访问量应该不大，不再单独创建一个rpc服务器对外提供服务
         RpcServer raftRpcServer = RaftRpcServerFactory.createRaftRpcServer(serverId.getEndpoint());
-        raftRpcServer.registerProcessor(new GetConfigProcessor());
-        raftRpcServer.registerProcessor(new PutConfigProcessor());
-        raftRpcServer.registerProcessor(new DelConfigProcessor());
+        raftRpcServer.registerProcessor(new CreateNamespaceProcessor(stateMachine));
+        raftRpcServer.registerProcessor(new CreatePropertiesProcessor(stateMachine));
+        raftRpcServer.registerProcessor(new GetConfigProcessor(stateMachine));
+        raftRpcServer.registerProcessor(new PutConfigProcessor(stateMachine));
+        raftRpcServer.registerProcessor(new DelConfigProcessor(stateMachine));
 
         RaftGroupService groupService = new RaftGroupService(raftConfig.getGroupId(),serverId,nodeOptions,raftRpcServer);
         raftNode = groupService.start();
@@ -83,5 +86,30 @@ public class ConfigRaftServer {
 
     public boolean isInit() {
         return isInit;
+    }
+
+    //判断当前节点是否为leader
+    public boolean isLeader(){
+        return leaderTerm.get() > 0;
+    }
+
+    public BaseResponse redirect(){
+        BaseResponse response = new BaseResponse();
+        response.setSuccess(false);
+        if (raftNode != null){
+            PeerId leaderId = raftNode.getLeaderId();
+            if (leaderId != null){
+                response.setRedirect(leaderId.toString());
+            }else{
+                response.setErrorMsg("raft cluster leader is missing");
+            }
+        }else{
+            response.setErrorMsg("this raft node is not exist");
+        }
+        return response;
+    }
+
+    public AtomicLong getLeaderTerm(){
+        return leaderTerm;
     }
 }

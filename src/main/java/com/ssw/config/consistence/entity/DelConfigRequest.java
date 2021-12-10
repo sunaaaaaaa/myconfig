@@ -1,7 +1,9 @@
 package com.ssw.config.consistence.entity;
 
+import com.ssw.config.core.entity.Constant;
+
 import java.io.Serializable;
-import java.util.Map;
+import java.util.List;
 
 /**
  * @ClassName DelConfigRequest
@@ -9,13 +11,13 @@ import java.util.Map;
  * @Author sun
  * @Date 2021/12/10 10:29
  **/
-public class DelConfigRequest implements Serializable {
+public class DelConfigRequest implements Serializable,BaseRequest {
 
     private static final long serialVersionUID = 8323945041051367291L;
 
     private String namespaceId;
     private String propertiesId;
-    private Map<String,String> props;
+    private List<String> propKeys;
 
     public String getNamespaceId() {
         return namespaceId;
@@ -33,11 +35,16 @@ public class DelConfigRequest implements Serializable {
         this.propertiesId = propertiesId;
     }
 
-    public Map<String, String> getProps() {
-        return props;
+    public List<String> getPropKeys() {
+        return propKeys;
     }
 
-    public void setProps(Map<String, String> props) {
-        this.props = props;
+    public void setPropKeys(List<String> propKeys) {
+        this.propKeys = propKeys;
+    }
+
+    @Override
+    public String requestType() {
+        return Constant.OPERATION_DEL_CONFIG;
     }
 }

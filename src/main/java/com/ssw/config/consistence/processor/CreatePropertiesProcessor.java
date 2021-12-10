@@ -3,25 +3,25 @@ package com.ssw.config.consistence.processor;
 import com.alipay.sofa.jraft.Status;
 import com.alipay.sofa.jraft.rpc.RpcContext;
 import com.alipay.sofa.jraft.rpc.RpcProcessor;
-import com.ssw.config.consistence.entity.GetConfigRequest;
+import com.ssw.config.consistence.entity.CreatePropertiesRequest;
 import com.ssw.config.consistence.statemachine.ConfigCenterStateMachine;
 
 /**
- * @ClassName GetConfigProcessor
+ * @ClassName CreatePropertiesProcessor
  * @Description
  * @Author sun
- * @Date 2021/12/10 10:30
+ * @Date 2021/12/10 14:04
  **/
-public class GetConfigProcessor implements RpcProcessor<GetConfigRequest> {
+public class CreatePropertiesProcessor implements RpcProcessor<CreatePropertiesRequest> {
 
     private ConfigCenterStateMachine stateMachine;
 
-    public GetConfigProcessor(ConfigCenterStateMachine stateMachine){
+    public CreatePropertiesProcessor(ConfigCenterStateMachine stateMachine){
         this.stateMachine = stateMachine;
     }
 
     @Override
-    public void handleRequest(RpcContext rpcContext, GetConfigRequest getConfigRequest) {
+    public void handleRequest(RpcContext rpcContext, CreatePropertiesRequest createPropertiesRequest) {
         ConfigCenterClosure closure = new ConfigCenterClosure() {
             @Override
             public void run(Status status) {
@@ -29,17 +29,13 @@ public class GetConfigProcessor implements RpcProcessor<GetConfigRequest> {
             }
         };
 
-        if (!getConfigRequest.isReadSafe()){
-           stateMachine.unSafeGetProps(closure);
-           return;
-        }
-        closure.setRequest(getConfigRequest);
-        closure.setOperation(getConfigRequest.requestType());
+        closure.setRequest(createPropertiesRequest);
+        closure.setOperation(createPropertiesRequest.requestType());
         stateMachine.handleRequest(closure);
     }
 
     @Override
     public String interest() {
-        return GetConfigRequest.class.getName();
+        return CreatePropertiesRequest.class.getName();
     }
 }
