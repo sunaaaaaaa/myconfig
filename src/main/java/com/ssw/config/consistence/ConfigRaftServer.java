@@ -43,7 +43,7 @@ public class ConfigRaftServer {
             throw new IllegalArgumentException("failed to parse serverId:" + serverHost);
         }
         Configuration peersConf = new Configuration();
-        if (peersConf.parse(peersHost)){
+        if (!peersConf.parse(peersHost)){
             throw new IllegalArgumentException("failed to parse peers host:" + peersHost);
         }
 

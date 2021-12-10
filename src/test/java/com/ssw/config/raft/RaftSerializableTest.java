@@ -1,4 +1,4 @@
-package com.ssw.config;
+package com.ssw.config.raft;
 
 import com.alipay.remoting.exception.CodecException;
 import com.alipay.remoting.serialization.SerializerManager;

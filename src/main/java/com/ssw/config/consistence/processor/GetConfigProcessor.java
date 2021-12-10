@@ -29,12 +29,13 @@ public class GetConfigProcessor implements RpcProcessor<GetConfigRequest> {
             }
         };
 
+        closure.setRequest(getConfigRequest);
+        closure.setOperation(getConfigRequest.requestType());
         if (!getConfigRequest.isReadSafe()){
            stateMachine.unSafeGetProps(closure);
            return;
         }
-        closure.setRequest(getConfigRequest);
-        closure.setOperation(getConfigRequest.requestType());
+
         stateMachine.handleRequest(closure);
     }
 
